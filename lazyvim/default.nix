@@ -149,7 +149,7 @@ in
 
           ''
         }require("lazy").setup({
-        	dev = { path = vim.api.nvim_list_runtime_paths()[1] .. "/pack/myNeovimPackages/start", patterns = { "" } },
+        	dev = { path = vim.api.nvim_list_runtime_paths()[1] .. "/pack/myNeovimPackages/start", patterns = { "" }, fallback = true, },
         	spec = {
         		-- add LazyVim and import its plugins
         		{ "LazyVim/LazyVim", import = "lazyvim.plugins" },${
