@@ -73,6 +73,10 @@ in
         };
       });
     };
+
+    pkgs = mkOption {
+      default = pkgs;
+    };
   };
 
   config = mkIf cfg.enable {
@@ -84,7 +88,7 @@ in
           let
             inherit (cfg.extras.lang) astro svelte typescript;
 
-            selfPkgs = self.packages.${pkgs.stdenv.hostPlatform.system};
+            selfPkgs = self.packages.${cfg.pkgs.stdenv.hostPlatform.system};
 
             masonPackages = [
               {
@@ -100,7 +104,7 @@ in
               {
                 cond = (astro.enable || svelte.enable || typescript.enable) && cfg.extras.dap.core.enable;
                 name = "packages/js-debug-adapter/js-debug/src/dapDebugServer.js";
-                path = "${pkgs.vscode-js-debug}/lib/node_modules/js-debug/dist/src/dapDebugServer.js";
+                path = "${cfg.pkgs.vscode-js-debug}/lib/node_modules/js-debug/dist/src/dapDebugServer.js";
               }
             ];
 
@@ -110,7 +114,7 @@ in
           in
           lib.optionalString (
             enabledMasonPackages != [ ]
-          ) "vim.env.MASON = \"${pkgs.linkFarm "mason" enabledMasonPackages}\"\n\n"
+          ) "vim.env.MASON = \"${cfg.pkgs.linkFarm "mason" enabledMasonPackages}\"\n\n"
         }require("lazy").setup({
         	dev = { path = vim.api.nvim_list_runtime_paths()[1] .. "/pack/myNeovimPackages/start", patterns = { "" }, fallback = true, },
         	spec = {
@@ -205,11 +209,11 @@ in
         })
       '';
 
-      extraPackages = builtins.attrValues { inherit (pkgs) lua-language-server shfmt stylua; };
+      extraPackages = builtins.attrValues { inherit (cfg.pkgs) lua-language-server shfmt stylua; };
 
       plugins = builtins.attrValues (
         removeAttrs {
-          inherit (pkgs.vimPlugins)
+          inherit (cfg.pkgs.vimPlugins)
             bufferline-nvim
             conform-nvim
             flash-nvim
@@ -249,10 +253,10 @@ in
           # programs.neovim -> pkgs.wrapNeovimUnstable ->
           # neovimUtils.packDir -> vimUtils.packDir -> vimFarm ->
           # linkFarm name [ { name = "${prefix}/${lib.getName drv}"; path = drv; } ]
-          catppuccin-nvim = pkgs.vimPlugins.catppuccin-nvim.overrideAttrs (oldAttrs: {
+          catppuccin-nvim = cfg.pkgs.vimPlugins.catppuccin-nvim.overrideAttrs (oldAttrs: {
             pname = "catppuccin";
           });
-          nvim-treesitter = pkgs.vimPlugins.nvim-treesitter.withPlugins (
+          nvim-treesitter = cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (
             plugins:
             builtins.attrValues {
               inherit (plugins)
