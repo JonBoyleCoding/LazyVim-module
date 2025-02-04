@@ -14,8 +14,7 @@ in
 {
   options.programs.lazyvim.extras.coding.blink = {
     enable = mkEnableOption "the coding.blink extra" // {
-      default = cfg.enable # TODO: && !cfg.extras.coding.nvim-cmp.enable
-      ;
+      default = cfg.enable && !cfg.extras.coding.nvim-cmp.enable;
     };
   };
 
