@@ -17,6 +17,7 @@ in
   imports = map (module: import module self) [
     ./extras/coding/blink.nix
     ./extras/coding/mini-surround.nix
+    ./extras/coding/nvim-cmp.nix
     ./extras/coding/yanky.nix
 
     ./extras/dap/core.nix
