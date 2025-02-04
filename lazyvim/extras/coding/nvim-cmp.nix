@@ -18,7 +18,7 @@ in
     };
   };
 
-  config = mkIf cfg.extras.coding.blink.enable {
+  config = mkIf cfg.extras.coding.nvim-cmp.enable {
     programs.neovim = {
       plugins = builtins.attrValues {
         inherit (pkgs.vimPlugins)
