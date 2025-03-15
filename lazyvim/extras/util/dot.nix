@@ -19,18 +19,18 @@ in
   config = mkIf cfg.extras.util.dot.enable {
     programs.neovim = {
       extraPackages = [
-        pkgs.bash-language-server
+        cfg.pkgs.bash-language-server
         # shellcheck included in bash-language-server
         # pkgs.shellcheck
       ];
 
       plugins = [
-        (pkgs.vimPlugins.nvim-treesitter.withPlugins (
+        (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (
           plugins:
-          [ plugins.git_config ]
-          ++ lib.optional config.wayland.windowManager.hyprland.enable plugins.hyprlang
-          ++ lib.optional config.programs.fish.enable plugins.fish
-          ++ lib.optional (config.programs.rofi.enable || config.programs.wofi.enable) plugins.rasi
+            [plugins.git_config]
+            ++ lib.optional config.wayland.windowManager.hyprland.enable plugins.hyprlang
+            ++ lib.optional config.programs.fish.enable plugins.fish
+            ++ lib.optional (config.programs.rofi.enable || config.programs.wofi.enable) plugins.rasi
         ))
       ];
     };

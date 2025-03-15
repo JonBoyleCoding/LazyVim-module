@@ -19,7 +19,8 @@ in
   config = mkIf cfg.extras.dap.core.enable {
     programs.neovim = {
       plugins = builtins.attrValues {
-        inherit (pkgs.vimPlugins)
+        inherit
+          (cfg.pkgs.vimPlugins)
           nvim-dap
           nvim-dap-ui
           nvim-dap-virtual-text

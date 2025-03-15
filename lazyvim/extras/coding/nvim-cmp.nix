@@ -21,7 +21,8 @@ in
   config = mkIf cfg.extras.coding.nvim-cmp.enable {
     programs.neovim = {
       plugins = builtins.attrValues {
-        inherit (pkgs.vimPlugins)
+        inherit
+          (cfg.pkgs.vimPlugins)
           nvim-cmp
           cmp-nvim-lsp
           cmp-buffer

@@ -18,15 +18,15 @@ in
 
   config = mkIf cfg.extras.lang.rust.enable {
     programs.neovim = {
-      extraPackages = [ pkgs.rust-analyzer ];
+      extraPackages = [cfg.pkgs.rust-analyzer];
 
       plugins =
         [
-          (pkgs.vimPlugins.nvim-treesitter.withPlugins (
-            plugins: builtins.attrValues { inherit (plugins) rust; }
+          (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (
+            plugins: builtins.attrValues {inherit (plugins) rust;}
           ))
         ]
-        ++ (with pkgs.vimPlugins; [
+        ++ (with cfg.pkgs.vimPlugins; [
           crates-nvim
           rustaceanvim
           clangd_extensions-nvim

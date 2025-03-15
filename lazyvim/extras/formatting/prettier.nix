@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.extras.formatting.prettier.enable {
     programs.neovim = {
-      extraPackages = [ pkgs.nodePackages.prettier ];
+      extraPackages = [cfg.pkgs.nodePackages.prettier];
     };
   };
 }

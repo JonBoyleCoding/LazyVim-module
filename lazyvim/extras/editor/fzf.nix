@@ -20,7 +20,7 @@ in
     };
 
     dependencies = mkOption {
-      default = builtins.attrValues { inherit (pkgs) fd fzf ripgrep; };
+      default = builtins.attrValues {inherit (cfg.pkgs) fd fzf ripgrep;};
       defaultText = literalExpression "[ pkgs.fd pkgs.fzf pkgs.ripgrep ]";
       description = ''
         List of packages to make available to Neovim.
@@ -36,7 +36,7 @@ in
     programs.neovim = {
       extraPackages = cfg.extras.editor.fzf.dependencies;
 
-      plugins = [ pkgs.vimPlugins.fzf-lua ];
+      plugins = [cfg.pkgs.vimPlugins.fzf-lua];
     };
   };
 }
