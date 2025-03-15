@@ -15,9 +15,9 @@ in {
 
   config = mkIf cfg.extras.lang.zig.enable {
     programs.neovim = {
-      extraPackages = builtins.attrValues {inherit (pkgs) zls;};
+      extraPackages = builtins.attrValues {inherit (cfg.pkgs) zls;};
 
-      plugins = [(pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [plugins.zig]))];
+      plugins = [(cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [plugins.zig]))];
     };
   };
 }
