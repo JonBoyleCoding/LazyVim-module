@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.extras.editor.dial.enable {
     programs.neovim = {
-      plugins = [ pkgs.vimPlugins.dial-nvim ];
+      plugins = [cfg.pkgs.vimPlugins.dial-nvim];
     };
   };
 }

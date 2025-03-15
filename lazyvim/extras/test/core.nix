@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.extras.test.core.enable {
     programs.neovim = {
-      plugins = builtins.attrValues { inherit (pkgs.vimPlugins) neotest nvim-nio; };
+      plugins = builtins.attrValues {inherit (cfg.pkgs.vimPlugins) neotest nvim-nio;};
     };
   };
 }

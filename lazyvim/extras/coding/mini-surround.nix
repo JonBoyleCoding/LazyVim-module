@@ -19,7 +19,7 @@ in
 
   config = mkIf cfg.extras.coding.mini-surround.enable {
     programs.neovim = {
-      plugins = [ pkgs.vimPlugins.mini-surround ];
+      plugins = [cfg.pkgs.vimPlugins.mini-surround];
     };
   };
 }

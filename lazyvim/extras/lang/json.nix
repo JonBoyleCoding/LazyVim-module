@@ -18,11 +18,11 @@ in
 
   config = mkIf cfg.extras.lang.json.enable {
     programs.neovim = {
-      extraPackages = [ pkgs.vscode-langservers-extracted ];
+      extraPackages = [cfg.pkgs.vscode-langservers-extracted];
 
       plugins = [
-        (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.json5 ]))
-        pkgs.vimPlugins.SchemaStore-nvim
+        (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [plugins.json5]))
+        cfg.pkgs.vimPlugins.SchemaStore-nvim
       ];
     };
   };

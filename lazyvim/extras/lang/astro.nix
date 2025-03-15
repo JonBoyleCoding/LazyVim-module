@@ -18,11 +18,11 @@ in
 
   config = mkIf cfg.extras.lang.astro.enable {
     programs.neovim = {
-      extraPackages = [ pkgs.astro-language-server ];
+      extraPackages = [cfg.pkgs.astro-language-server];
 
       plugins = [
-        (pkgs.vimPlugins.nvim-treesitter.withPlugins (
-          plugins: builtins.attrValues { inherit (plugins) astro css; }
+        (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (
+          plugins: builtins.attrValues {inherit (plugins) astro css;}
         ))
       ];
     };

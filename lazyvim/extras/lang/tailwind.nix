@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.extras.lang.tailwind.enable {
     programs.neovim = {
-      extraPackages = [ pkgs.tailwindcss-language-server ];
+      extraPackages = [cfg.pkgs.tailwindcss-language-server];
 
       # TODO: lib.optional cfg.extras.coding.nvim-cmp.enable
       # plugins = [

@@ -18,9 +18,9 @@ in
 
   config = mkIf cfg.extras.lang.svelte.enable {
     programs.neovim = {
-      extraPackages = [ pkgs.svelte-language-server ];
+      extraPackages = [cfg.pkgs.svelte-language-server];
 
-      plugins = [ (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.svelte ])) ];
+      plugins = [(cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [plugins.svelte]))];
     };
   };
 }
