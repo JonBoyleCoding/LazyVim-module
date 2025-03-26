@@ -1,14 +1,17 @@
-self: {
+self:
+{
   config,
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkEnableOption;
 
   cfg = config.programs.lazyvim;
-in {
+in
+{
   options.programs.lazyvim.extras.lang.zig = {
     enable = mkEnableOption "the lang.zig extra";
   };
@@ -19,7 +22,7 @@ in {
 
       plugins = [
         (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.zig ]))
-      ] ++ optional cfg.extras.test.core.enable pkgs.vimPlugins.neotest-zig;
+      ] ++ lib.optional cfg.extras.test.core.enable pkgs.vimPlugins.neotest-zig;
     };
   };
 }
