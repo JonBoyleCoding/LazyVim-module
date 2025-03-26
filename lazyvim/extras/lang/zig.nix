@@ -17,7 +17,9 @@ in {
     programs.neovim = {
       extraPackages = builtins.attrValues {inherit (cfg.pkgs) zls;};
 
-      plugins = [(cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [plugins.zig]))];
+      plugins = [
+        (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.zig ]))
+      ] ++ optional cfg.extras.test.core.enable pkgs.vimPlugins.neotest-zig;
     };
   };
 }
