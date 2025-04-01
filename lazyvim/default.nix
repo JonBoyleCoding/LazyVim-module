@@ -1,18 +1,30 @@
 self: {
   config,
-  inputs,
   lib,
   pkgs,
   ...
 }: let
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkEnableOption mkOption;
-  inherit (lib.types) listOf str submodule;
+  inherit (lib.types)
+    anything
+    attrsOf
+    listOf
+    str
+    submodule
+    ;
+  inherit (self.lib.generators) toLazySpecs;
+  inherit (self.lib.types) nested;
 
   cfg = config.programs.lazyvim;
 in {
   imports = map (module: import module self) [
+    ./config
+
+    ./extras/ai/copilot-chat.nix
+
     ./extras/coding/blink.nix
+    ./extras/coding/mini-snippets.nix
     ./extras/coding/mini-surround.nix
     ./extras/coding/yanky.nix
 
@@ -21,10 +33,13 @@ in {
     ./extras/editor/dial.nix
     ./extras/editor/fzf.nix
     ./extras/editor/inc-rename.nix
+    ./extras/editor/snacks_explorer.nix
+    ./extras/editor/snacks_picker.nix
 
     ./extras/formatting/prettier.nix
 
     ./extras/lang/astro.nix
+    ./extras/lang/go.nix
     ./extras/lang/json.nix
     ./extras/lang/markdown.nix
     ./extras/lang/nix.nix
@@ -72,6 +87,12 @@ in {
 
     pkgs = mkOption {
       default = pkgs;
+	};
+
+    lazySpecs = mkOption {
+      default = { };
+      internal = true;
+      type = nested attrsOf (listOf (attrsOf anything));
     };
   };
 
@@ -115,22 +136,41 @@ in {
         	dev = { path = vim.api.nvim_list_runtime_paths()[1] .. "/pack/myNeovimPackages/start", patterns = { "" } },
         	spec = {
         		-- add LazyVim and import its plugins
-        		{ "LazyVim/LazyVim", import = "lazyvim.plugins" },
+        		{ "LazyVim/LazyVim", import = "lazyvim.plugins" },${
+            lib.optionalString (cfg.lazySpecs != { }) ''
+
+              		{ dir = "${
+                  pkgs.vimUtils.buildVimPlugin {
+                    name = specsPluginName;
+                    src = pkgs.buildEnv {
+                      name = specsPluginName;
+                      paths = map (
+                        { path, specs }:
+                        pkgs.writeTextDir "${builtins.concatStringsSep "/" path}.lua" (toLazySpecs { } specs)
+                      ) pathsWithSpecs;
+                      extraPrefix = "/lua/${specsPluginName}/plugins";
+                    };
+                  }
+                }" },''
+          }
         		{ "jay-babu/mason-nvim-dap.nvim", enabled = false },
         		{ "williamboman/mason-lspconfig.nvim", enabled = false },
         		{ "williamboman/mason.nvim", enabled = false },${
-          let
-            enabledOptions = path: options:
-              builtins.concatMap (
-                name: let
-                  v = options.${name};
-                in
-                  if builtins.isAttrs v
-                  then enabledOptions (path + "." + name) v
-                  else if name == "enable" && v
-                  then [path]
-                  else []
-              ) (builtins.attrNames options);
+            let
+              enabledOptions =
+                path: options:
+                builtins.concatMap (
+                  name:
+                  let
+                    v = options.${name};
+                  in
+                  if builtins.isAttrs v then
+                    enabledOptions (path + "." + name) v
+                  else if name == "enable" && v && options.extra or true then
+                    [ path ]
+                  else
+                    [ ]
+                ) (builtins.attrNames options);
 
             enabledExtras = enabledOptions "extras" cfg.extras;
           in
@@ -138,6 +178,9 @@ in {
             + builtins.concatStringsSep "\n\t\t" (
               map (plugin: "{ \"${plugin.lazyName}\", enabled = false },") cfg.pluginsToDisable
               ++ map (extra: "{ import = \"lazyvim.plugins.${extra}\" },") enabledExtras
+              ++ map (
+                { path, ... }: "{ import = \"${specsPluginName}.plugins.${builtins.concatStringsSep "." path}\" },"
+              ) pathsWithSpecs
             )
         }
         		-- import/override with your plugins

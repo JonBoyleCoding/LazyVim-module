@@ -5,9 +5,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     systems.url = "github:nix-systems/default-linux";
-
-    tailwindcss-colorizer-cmp-nvim.url = "github:roobert/tailwindcss-colorizer-cmp.nvim";
-    tailwindcss-colorizer-cmp-nvim.flake = false;
   };
 
   outputs =
@@ -23,7 +20,7 @@
         lazyvim = import ./lazyvim self;
       };
 
-      lib = import ./lib;
+      lib = import ./lib { inherit (nixpkgs) lib; };
 
       packages = nixpkgs.lib.genAttrs (import systems) (
         system:
