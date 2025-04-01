@@ -1,21 +1,40 @@
-self:
-{
+self: {
   config,
-  inputs,
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkEnableOption mkOption;
-  inherit (lib.types) listOf str submodule;
+  inherit
+    (lib.types)
+    anything
+    attrsOf
+    listOf
+    str
+    submodule
+    ;
+  inherit (self.lib.generators) toLazySpecs;
+  inherit (self.lib.types) nested;
 
   cfg = config.programs.lazyvim;
-in
-{
+
+  pathsAndSpecs = path: specs:
+    if builtins.isAttrs specs
+    then builtins.concatMap (name: pathsAndSpecs (path ++ [name]) specs.${name}) (builtins.attrNames specs)
+    else [{inherit path specs;}];
+
+  pathsWithSpecs = pathsAndSpecs [] cfg.lazySpecs;
+
+  specsPluginName = "LazyVim-module-specs";
+in {
   imports = map (module: import module self) [
+    ./config
+
+    ./extras/ai/copilot-chat.nix
+
     ./extras/coding/blink.nix
+    ./extras/coding/mini-snippets.nix
     ./extras/coding/mini-surround.nix
     ./extras/coding/nvim-cmp.nix
     ./extras/coding/yanky.nix
@@ -25,10 +44,13 @@ in
     ./extras/editor/dial.nix
     ./extras/editor/fzf.nix
     ./extras/editor/inc-rename.nix
+    ./extras/editor/snacks_explorer.nix
+    ./extras/editor/snacks_picker.nix
 
     ./extras/formatting/prettier.nix
 
     ./extras/lang/astro.nix
+    ./extras/lang/go.nix
     ./extras/lang/json.nix
     ./extras/lang/markdown.nix
     ./extras/lang/nix.nix
@@ -55,7 +77,7 @@ in
     enable = mkEnableOption "lazyvim";
 
     pluginsToDisable = mkOption {
-      default = [ ];
+      default = [];
       description = ''
         List of plugins to remove.
       '';
@@ -69,14 +91,20 @@ in
       '';
       type = listOf (submodule {
         options = {
-          lazyName = mkOption { type = str; };
-          nixName = mkOption { type = str; };
+          lazyName = mkOption {type = str;};
+          nixName = mkOption {type = str;};
         };
       });
     };
 
     pkgs = mkOption {
       default = pkgs;
+    };
+
+    lazySpecs = mkOption {
+      default = {};
+      internal = true;
+      type = nested attrsOf (listOf (attrsOf anything));
     };
   };
 
@@ -109,45 +137,67 @@ in
               }
             ];
 
-            enabledMasonPackages = map (enabledMasonPackage: { inherit (enabledMasonPackage) name path; }) (
+            enabledMasonPackages = map (enabledMasonPackage: {inherit (enabledMasonPackage) name path;}) (
               builtins.filter (masonPackage: masonPackage.cond) masonPackages
             );
           in
-          lib.optionalString (
-            enabledMasonPackages != [ ]
-          ) "vim.env.MASON = \"${pkgs.linkFarm "mason" enabledMasonPackages}\"\n\n"
+            lib.optionalString (
+              enabledMasonPackages != []
+            ) "vim.env.MASON = \"${pkgs.linkFarm "mason" enabledMasonPackages}\"\n\n"
         }require("lazy").setup({
         	dev = { path = vim.api.nvim_list_runtime_paths()[1] .. "/pack/myNeovimPackages/start", patterns = { "" }, fallback = true, },
         	spec = {
         		-- add LazyVim and import its plugins
-        		{ "LazyVim/LazyVim", import = "lazyvim.plugins" },
+        		{ "LazyVim/LazyVim", import = "lazyvim.plugins" },${
+          lib.optionalString (cfg.lazySpecs != {}) ''
+
+            { dir = "${
+              pkgs.vimUtils.buildVimPlugin {
+                name = specsPluginName;
+                src = pkgs.buildEnv {
+                  name = specsPluginName;
+                  paths =
+                    map (
+                      {
+                        path,
+                        specs,
+                      }:
+                        pkgs.writeTextDir "${builtins.concatStringsSep "/" path}.lua" (toLazySpecs {} specs)
+                    )
+                    pathsWithSpecs;
+                  extraPrefix = "/lua/${specsPluginName}/plugins";
+                };
+              }
+            }" },''
+        }
         		{ "jay-babu/mason-nvim-dap.nvim", enabled = false },
         		{ "williamboman/mason-lspconfig.nvim", enabled = false },
         		{ "williamboman/mason.nvim", enabled = false },${
-            let
-              enabledOptions =
-                path: options:
-                builtins.concatMap (
-                  name:
-                  let
-                    v = options.${name};
-                  in
-                  if builtins.isAttrs v then
-                    enabledOptions (path + "." + name) v
-                  else if name == "enable" && v then
-                    [ path ]
-                  else
-                    [ ]
-                ) (builtins.attrNames options);
+          let
+            enabledOptions = path: options:
+              builtins.concatMap (
+                name: let
+                  v = options.${name};
+                in
+                  if builtins.isAttrs v
+                  then enabledOptions (path + "." + name) v
+                  else if name == "enable" && v && options.extra or true
+                  then [path]
+                  else []
+              ) (builtins.attrNames options);
 
-              enabledExtras = enabledOptions "extras" cfg.extras;
-            in
-            lib.optionalString (cfg.pluginsToDisable != [ ] || enabledExtras != [ ]) "\n\t\t"
+            enabledExtras = enabledOptions "extras" cfg.extras;
+          in
+            lib.optionalString (cfg.pluginsToDisable != [] || enabledExtras != []) "\n\t\t"
             + builtins.concatStringsSep "\n\t\t" (
               map (plugin: "{ \"${plugin.lazyName}\", enabled = false },") cfg.pluginsToDisable
               ++ map (extra: "{ import = \"lazyvim.plugins.${extra}\" },") enabledExtras
+              ++ map (
+                {path, ...}: "{ import = \"${specsPluginName}.plugins.${builtins.concatStringsSep "." path}\" },"
+              )
+              pathsWithSpecs
             )
-          }
+        }
         		-- import/override with your plugins
         		{ import = "plugins" },
         		{
@@ -183,38 +233,47 @@ in
         			},
         			paths = {
         				${
-              let
-                wrapPlugins =
-                  plugins:
-                  map (plugin: {
-                    key = plugin.outPath;
-                    deps = plugin.dependencies or [ ];
-                  }) plugins;
-              in
-              builtins.concatStringsSep "\n\t\t\t\t" (
-                map ({ key, deps }: "\"${key}\",") (
-                  builtins.genericClosure {
-                    startSet = wrapPlugins (
-                      builtins.concatMap (
-                        plugin: plugin.dependencies or [ ]
-                      ) config.programs.neovim.finalPackage.passthru.packpathDirs.myNeovimPackages.start
-                    );
-                    operator = { key, deps }: wrapPlugins deps;
-                  }
-                )
+          let
+            wrapPlugins = plugins:
+              map (plugin: {
+                key = plugin.outPath;
+                deps = plugin.dependencies or [];
+              })
+              plugins;
+          in
+            builtins.concatStringsSep "\n\t\t\t\t" (
+              map ({
+                key,
+                deps,
+              }: "\"${key}\",") (
+                builtins.genericClosure {
+                  startSet = wrapPlugins (
+                    builtins.concatMap (
+                      plugin: plugin.dependencies or []
+                    )
+                    config.programs.neovim.finalPackage.passthru.packpathDirs.myNeovimPackages.start
+                  );
+                  operator = {
+                    key,
+                    deps,
+                  }:
+                    wrapPlugins deps;
+                }
               )
-            }
+            )
+        }
         			},
         		},
         	},
         })
       '';
 
-      extraPackages = builtins.attrValues { inherit (cfg.pkgs) lua-language-server shfmt stylua; };
+      extraPackages = builtins.attrValues {inherit (cfg.pkgs) lua-language-server shfmt stylua;};
 
       plugins = builtins.attrValues (
         removeAttrs {
-          inherit (cfg.pkgs.vimPlugins)
+          inherit
+            (cfg.pkgs.vimPlugins)
             bufferline-nvim
             conform-nvim
             flash-nvim
@@ -259,34 +318,35 @@ in
           });
           nvim-treesitter = cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (
             plugins:
-            builtins.attrValues {
-              inherit (plugins)
-                bash
-                c
-                diff
-                html
-                javascript
-                jsdoc
-                json
-                jsonc
-                lua
-                luadoc
-                luap
-                markdown
-                markdown_inline
-                printf
-                python
-                query
-                regex
-                toml
-                tsx
-                typescript
-                vim
-                vimdoc
-                xml
-                yaml
-                ;
-            }
+              builtins.attrValues {
+                inherit
+                  (plugins)
+                  bash
+                  c
+                  diff
+                  html
+                  javascript
+                  jsdoc
+                  json
+                  jsonc
+                  lua
+                  luadoc
+                  luap
+                  markdown
+                  markdown_inline
+                  printf
+                  python
+                  query
+                  regex
+                  toml
+                  tsx
+                  typescript
+                  vim
+                  vimdoc
+                  xml
+                  yaml
+                  ;
+              }
           );
         } (map (plugin: plugin.nixName) cfg.pluginsToDisable)
       );
