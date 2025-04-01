@@ -1,24 +1,21 @@
-self:
-{
+self: {
   config,
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkEnableOption;
 
   cfg = config.programs.lazyvim;
-in
-{
+in {
   options.programs.lazyvim.extras.ai.copilot-chat = {
     enable = mkEnableOption "the ai.copilot-chat extra";
   };
 
   config = mkIf cfg.extras.ai.copilot-chat.enable {
     programs.neovim = {
-      plugins = [ pkgs.vimPlugins.CopilotChat-nvim ];
+      plugins = [cfg.pkgs.vimPlugins.CopilotChat-nvim];
     };
   };
 }

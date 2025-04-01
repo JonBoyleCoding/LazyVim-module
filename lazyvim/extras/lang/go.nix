@@ -1,19 +1,16 @@
-self:
-{
+self: {
   config,
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   inherit (builtins) attrValues;
   inherit (lib.lists) optional;
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkEnableOption;
 
   cfg = config.programs.lazyvim;
-in
-{
+in {
   options.programs.lazyvim.extras.lang.go = {
     enable = mkEnableOption "the lang.go extra";
   };
@@ -21,7 +18,7 @@ in
   config = mkIf cfg.extras.lang.go.enable {
     programs.neovim = {
       extraPackages =
-        attrValues { inherit (pkgs) gofumpt gopls gotools; }
+        attrValues {inherit (cfg.pkgs) gofumpt gopls gotools;}
         ++ optional cfg.extras.dap.core.enable pkgs.delve;
       # TODO: ++ optionals cfg.extras.lsp.none-ls.enable (attrValues {
       #   inherit (pkgs) gomodifytags impl;
@@ -29,20 +26,21 @@ in
 
       plugins =
         [
-          (pkgs.vimPlugins.nvim-treesitter.withPlugins (
+          (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (
             plugins:
-            attrValues {
-              inherit (plugins)
-                go
-                gomod
-                gosum
-                gowork
-                ;
-            }
+              attrValues {
+                inherit
+                  (plugins)
+                  go
+                  gomod
+                  gosum
+                  gowork
+                  ;
+              }
           ))
         ]
-        ++ optional cfg.extras.dap.core.enable pkgs.vimPlugins.nvim-dap-go
-        ++ optional cfg.extras.test.core.enable pkgs.vimPlugins.neotest-golang;
+        ++ optional cfg.extras.dap.core.enable cfg.pkgs.vimPlugins.nvim-dap-go
+        ++ optional cfg.extras.test.core.enable cfg.pkgs.vimPlugins.neotest-golang;
     };
   };
 }
