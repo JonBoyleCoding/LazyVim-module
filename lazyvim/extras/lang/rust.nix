@@ -1,24 +1,22 @@
-self:
-{
+self: {
   config,
   lib,
   pkgs,
   ...
-}:
-let
+}: let
   inherit (lib.modules) mkIf;
   inherit (lib.options) mkEnableOption;
+  inherit (lib.lists) optional;
 
   cfg = config.programs.lazyvim;
-in
-{
+in {
   options.programs.lazyvim.extras.lang.rust = {
     enable = mkEnableOption "the lang.rust extra";
   };
 
   config = mkIf cfg.extras.lang.rust.enable {
     programs.neovim = {
-      extraPackages = [cfg.pkgs.rust-analyzer];
+      extraPackages = [cfg.pkgs.rust-analyzer] ++ optional cfg.extras.dap.core.enable (with cfg.pkgs; [codelldb cpptools]);
 
       plugins =
         [
