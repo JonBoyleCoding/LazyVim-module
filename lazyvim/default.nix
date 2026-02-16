@@ -45,6 +45,7 @@ in
     ./extras/coding/blink.nix
     ./extras/coding/mini-snippets.nix
     ./extras/coding/mini-surround.nix
+    ./extras/coding/nvim-cmp.nix
     ./extras/coding/yanky.nix
 
     ./extras/dap/core.nix
