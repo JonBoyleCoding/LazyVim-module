@@ -20,7 +20,7 @@ in
   config = mkIf cfg.extras.coding.mini-snippets.enable {
     programs.neovim = {
       # TODO: remove luasnip and nvim-snippets
-      plugins = attrValues { inherit (pkgs.vimPlugins) friendly-snippets mini-snippets; };
+      plugins = attrValues { inherit (cfg.pkgs.vimPlugins) friendly-snippets mini-snippets; };
       # TODO: ++ optional cfg.extras.coding.nvim-cmp.enable (
       #   buildVimPlugin inputs pkgs {
       #     pname = "cmp-mini-snippets";

@@ -34,7 +34,7 @@ in
 
     pluginsFile = mkOption {
       default = {
-        "example.lua".source = pkgs.fetchurl {
+        "example.lua".source = cfg.pkgs.fetchurl {
           url = "https://raw.githubusercontent.com/LazyVim/starter/refs/heads/main/lua/plugins/example.lua";
           hash = "sha256-Y8q4s3oxnaZAsHO21lSxGVJ3bqyMtV2KasAOXxcTZro=";
         };

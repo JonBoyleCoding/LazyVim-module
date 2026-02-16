@@ -20,7 +20,7 @@ in
 
   config = mkIf cfg.extras.coding.blink.enable {
     programs.neovim = {
-      plugins = builtins.attrValues { inherit (pkgs.vimPlugins) blink-cmp friendly-snippets; };
+      plugins = builtins.attrValues {inherit (cfg.pkgs.vimPlugins) blink-cmp friendly-snippets;};
     };
   };
 }

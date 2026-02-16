@@ -18,9 +18,9 @@ in
 
   config = mkIf cfg.extras.lang.prisma.enable {
     programs.neovim = {
-      extraPackages = [ pkgs.prisma-language-server ];
+      extraPackages = [ cfg.pkgs.prisma-language-server ];
 
-      plugins = [ (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.prisma ])) ];
+      plugins = [(cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [plugins.prisma]))];
     };
   };
 }

@@ -18,9 +18,9 @@ in
 
   config = mkIf cfg.extras.lang.nix.enable {
     programs.neovim = {
-      extraPackages = builtins.attrValues { inherit (pkgs) nil; };
+      extraPackages = builtins.attrValues {inherit (cfg.pkgs) nil nixfmt-rfc-style;};
 
-      plugins = [ (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.nix ])) ];
+      plugins = [(cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [plugins.nix]))];
     };
   };
 }

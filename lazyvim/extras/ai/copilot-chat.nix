@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.extras.ai.copilot-chat.enable {
     programs.neovim = {
-      plugins = [ pkgs.vimPlugins.CopilotChat-nvim ];
+      plugins = [ cfg.pkgs.vimPlugins.CopilotChat-nvim ];
     };
   };
 }

@@ -30,14 +30,14 @@ in
         extras.editor.snacks_picker = mkIf cfg.extras.editor.snacks_picker.db.sqlite3.enable [
           {
             ref = "folke/snacks.nvim";
-            opts.picker.db.sqlite3_path = "${pkgs.sqlite.out}/lib/libsqlite3${pkgs.stdenv.hostPlatform.extensions.sharedLibrary}";
+            opts.picker.db.sqlite3_path = "${cfg.pkgs.sqlite.out}/lib/libsqlite3${cfg.pkgs.stdenv.hostPlatform.extensions.sharedLibrary}";
           }
         ];
       };
     };
 
     programs.neovim = {
-      plugins = [ pkgs.vimPlugins.snacks-nvim ];
+      plugins = [ cfg.pkgs.vimPlugins.snacks-nvim ];
     };
   };
 }

@@ -27,10 +27,10 @@ in
             opts.server = {
               type = "binary";
               custom_server_filepath = getExe (
-                if pkgs.stdenv.hostPlatform.isLinux then
-                  pkgs.copilot-language-server-fhs
+                if cfg.pkgs.stdenv.hostPlatform.isLinux then
+                  cfg.pkgs.copilot-language-server-fhs
                 else
-                  pkgs.copilot-language-server
+                  cfg.pkgs.copilot-language-server
               );
             };
           }
@@ -40,10 +40,10 @@ in
 
     programs.neovim = {
       plugins =
-        [ pkgs.vimPlugins.copilot-lua ]
+        [ cfg.pkgs.vimPlugins.copilot-lua ]
         ++ optionals cfg.ai_cmp (
-          optional cfg.extras.coding.blink.enable pkgs.vimPlugins.blink-cmp-copilot
-          # TODO: ++ optional cfg.extras.coding.nvim-cmp.enable pkgs.vimPlugins.copilot-cmp
+          optional cfg.extras.coding.blink.enable cfg.pkgs.vimPlugins.blink-cmp-copilot
+          # TODO: ++ optional cfg.extras.coding.nvim-cmp.enable cfg.pkgs.vimPlugins.copilot-cmp
         );
     };
   };

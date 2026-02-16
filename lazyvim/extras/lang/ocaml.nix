@@ -18,10 +18,10 @@ in
 
   config = mkIf cfg.extras.lang.ocaml.enable {
     programs.neovim = {
-      extraPackages = [ pkgs.ocamlPackages.ocaml-lsp ];
+      extraPackages = [ cfg.pkgs.ocamlPackages.ocaml-lsp ];
 
       plugins = [
-        (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.ocaml ]))
+        (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.ocaml ]))
       ];
     };
   };

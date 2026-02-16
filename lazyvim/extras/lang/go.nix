@@ -21,15 +21,15 @@ in
   config = mkIf cfg.extras.lang.go.enable {
     programs.neovim = {
       extraPackages =
-        attrValues { inherit (pkgs) gofumpt gopls gotools; }
-        ++ optional cfg.extras.dap.core.enable pkgs.delve;
+        attrValues { inherit (cfg.pkgs) gofumpt gopls gotools; }
+        ++ optional cfg.extras.dap.core.enable cfg.pkgs.delve;
       # TODO: ++ optionals cfg.extras.lsp.none-ls.enable (attrValues {
       #   inherit (pkgs) gomodifytags impl;
       # });
 
       plugins =
         [
-          (pkgs.vimPlugins.nvim-treesitter.withPlugins (
+          (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (
             plugins:
             attrValues {
               inherit (plugins)
@@ -41,8 +41,8 @@ in
             }
           ))
         ]
-        ++ optional cfg.extras.dap.core.enable pkgs.vimPlugins.nvim-dap-go
-        ++ optional cfg.extras.test.core.enable pkgs.vimPlugins.neotest-golang;
+        ++ optional cfg.extras.dap.core.enable cfg.pkgs.vimPlugins.nvim-dap-go
+        ++ optional cfg.extras.test.core.enable cfg.pkgs.vimPlugins.neotest-golang;
     };
   };
 }

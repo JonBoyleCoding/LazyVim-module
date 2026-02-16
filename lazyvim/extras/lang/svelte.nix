@@ -20,14 +20,14 @@ in
     programs.lazyvim = {
       masonPackages = {
         "svelte-language-server/node_modules/typescript-svelte-plugin" =
-          self.packages.${pkgs.stdenv.hostPlatform.system}.typescript-svelte-plugin;
+          self.packages.${cfg.pkgs.stdenv.hostPlatform.system}.typescript-svelte-plugin;
       };
     };
 
     programs.neovim = {
-      extraPackages = [ pkgs.svelte-language-server ];
+      extraPackages = [cfg.pkgs.svelte-language-server];
 
-      plugins = [ (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.svelte ])) ];
+      plugins = [(cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [plugins.svelte]))];
     };
   };
 }

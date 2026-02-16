@@ -19,22 +19,22 @@ in
 
   config =
     mkIf
-      (
-        let
-          inherit (cfg.extras.lang) astro svelte typescript;
-        in
+    (
+      let
+        inherit (cfg.extras.lang) astro svelte typescript;
+      in
         astro.enable || svelte.enable || typescript.enable
       )
       {
         programs.lazyvim = {
           masonPackages = optionalAttrs cfg.extras.dap.core.enable {
             "js-debug-adapter/js-debug/src/dapDebugServer.js" =
-              "${pkgs.vscode-js-debug}/lib/node_modules/js-debug/dist/src/dapDebugServer.js";
+              "${cfg.pkgs.vscode-js-debug}/lib/node_modules/js-debug/dist/src/dapDebugServer.js";
           };
         };
 
         programs.neovim = {
-          extraPackages = [ pkgs.vtsls ];
-        };
+          extraPackages = [ cfg.pkgs.vtsls ];
       };
+    };
 }

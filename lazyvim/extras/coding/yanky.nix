@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.extras.coding.yanky.enable {
     programs.neovim = {
-      plugins = [ pkgs.vimPlugins.yanky-nvim ];
+      plugins = [cfg.pkgs.vimPlugins.yanky-nvim];
     };
   };
 }

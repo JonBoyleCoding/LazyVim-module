@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.extras.editor.snacks_explorer.enable {
     programs.neovim = {
-      plugins = [ pkgs.vimPlugins.snacks-nvim ];
+      plugins = [ cfg.pkgs.vimPlugins.snacks-nvim ];
     };
   };
 }

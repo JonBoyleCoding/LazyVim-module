@@ -18,11 +18,11 @@ in
 
   config = mkIf cfg.extras.lang.zig.enable {
     programs.neovim = {
-      extraPackages = builtins.attrValues { inherit (pkgs) zls; };
+      extraPackages = builtins.attrValues { inherit (cfg.pkgs) zls; };
 
       plugins = [
-        (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.zig ]))
-      ] ++ lib.optional cfg.extras.test.core.enable pkgs.vimPlugins.neotest-zig;
+        (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: [ plugins.zig ]))
+      ] ++ lib.optional cfg.extras.test.core.enable cfg.pkgs.vimPlugins.neotest-zig;
     };
   };
 }

@@ -7,18 +7,36 @@ self:
 }:
 let
   inherit (lib.modules) mkIf;
-  inherit (lib.options) mkEnableOption;
+  inherit (lib.options) mkEnableOption mkOption literalExpression;
+  inherit (lib.types) listOf package;
 
   cfg = config.programs.lazyvim;
 in
 {
   options.programs.lazyvim.extras.editor.fzf = {
-    enable = mkEnableOption "the editor.fzf extra";
+    enable = mkEnableOption "the editor.fzf extra" // {
+      default = cfg.enable # TODO: && !cfg.extras.editor.telescope.enable
+      ;
+    };
+
+    dependencies = mkOption {
+      default = builtins.attrValues {inherit (cfg.pkgs) fd fzf ripgrep;};
+      defaultText = literalExpression "[ pkgs.fd pkgs.fzf pkgs.ripgrep ]";
+      description = ''
+        List of packages to make available to Neovim.
+
+        Check out `:help fzf-lua-dependencies` for more info.
+        (LazyVim already configures mini.icons and `previewer.builtin.extensions`.)
+      '';
+      type = listOf package;
+    };
   };
 
   config = mkIf cfg.extras.editor.fzf.enable {
     programs.neovim = {
-      plugins = [ pkgs.vimPlugins.fzf-lua ];
+      extraPackages = cfg.extras.editor.fzf.dependencies;
+
+      plugins = [cfg.pkgs.vimPlugins.fzf-lua];
     };
   };
 }

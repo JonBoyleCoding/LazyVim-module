@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.extras.util.mini-hipatterns.enable {
     programs.neovim = {
-      plugins = [ pkgs.vimPlugins.mini-hipatterns ];
+      plugins = [cfg.pkgs.vimPlugins.mini-hipatterns];
     };
   };
 }

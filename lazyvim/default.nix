@@ -18,7 +18,7 @@ let
     str
     submodule
     ;
-  inherit (pkgs) linkFarm symlinkJoin;
+  inherit (cfg.pkgs) linkFarm symlinkJoin;
   inherit (self.lib.generators) toLazySpecs;
   inherit (self.lib.types) nested;
 
@@ -109,6 +109,10 @@ in
       });
     };
 
+    pkgs = mkOption {
+      default = pkgs;
+    };
+
     lazySpecs = mkOption {
       default = { };
       internal = true;
@@ -156,13 +160,13 @@ in
             lib.optionalString (cfg.lazySpecs != { }) ''
 
               		{ dir = "${
-                  pkgs.vimUtils.buildVimPlugin {
+                  cfg.pkgs.vimUtils.buildVimPlugin {
                     name = specsPluginName;
-                    src = pkgs.buildEnv {
+                    src = cfg.pkgs.buildEnv {
                       name = specsPluginName;
                       paths = map (
                         { path, specs }:
-                        pkgs.writeTextDir "${builtins.concatStringsSep "/" path}.lua" (toLazySpecs { } specs)
+                        cfg.pkgs.writeTextDir "${builtins.concatStringsSep "/" path}.lua" (toLazySpecs { } specs)
                       ) pathsWithSpecs;
                       extraPrefix = "/lua/${specsPluginName}/plugins";
                     };
@@ -208,7 +212,7 @@ in
               symlinkJoin {
                 pname = "tree-sitter-grammars";
 
-                inherit (pkgs.vimPlugins.nvim-treesitter) version;
+                inherit (cfg.pkgs.vimPlugins.nvim-treesitter) version;
 
                 paths = map ({ key, requires }: key) (
                   let
@@ -302,11 +306,11 @@ in
         })
       '';
 
-      extraPackages = builtins.attrValues { inherit (pkgs) lua-language-server shfmt stylua; };
+      extraPackages = builtins.attrValues { inherit (cfg.pkgs) lua-language-server shfmt stylua; };
 
       plugins = builtins.attrValues (
         removeAttrs {
-          inherit (pkgs.vimPlugins)
+          inherit (cfg.pkgs.vimPlugins)
             bufferline-nvim
             conform-nvim
             flash-nvim
@@ -346,10 +350,10 @@ in
           # programs.neovim -> pkgs.wrapNeovimUnstable ->
           # neovimUtils.packDir -> vimUtils.packDir -> vimFarm ->
           # linkFarm name [ { name = "${prefix}/${lib.getName drv}"; path = drv; } ]
-          catppuccin-nvim = pkgs.vimPlugins.catppuccin-nvim.overrideAttrs (oldAttrs: {
+          catppuccin-nvim = cfg.pkgs.vimPlugins.catppuccin-nvim.overrideAttrs (oldAttrs: {
             pname = "catppuccin";
           });
-          nvim-treesitter = pkgs.vimPlugins.nvim-treesitter.withPlugins (
+          nvim-treesitter = cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (
             plugins:
             builtins.attrValues {
               inherit (plugins)

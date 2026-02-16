@@ -34,7 +34,7 @@ in
             ref = "neovim/nvim-lspconfig";
             opts.servers.astro.on_new_config =
               let
-                tsdk = "${pkgs.vtsls}/lib/vtsls-language-server/node_modules/typescript/lib";
+                tsdk = "${cfg.pkgs.vtsls}/lib/vtsls-language-server/node_modules/typescript/lib";
               in
               mkLuaInline
                 # lua
@@ -75,16 +75,16 @@ in
 
       masonPackages = {
         "astro-language-server/node_modules/@astrojs/ts-plugin" =
-          self.packages.${pkgs.stdenv.hostPlatform.system}.astro-ts-plugin;
+          self.packages.${cfg.pkgs.stdenv.hostPlatform.system}.astro-ts-plugin;
       };
     };
 
     programs.neovim = {
-      extraPackages = [ pkgs.astro-language-server ];
+      extraPackages = [cfg.pkgs.astro-language-server];
 
       plugins = [
-        (pkgs.vimPlugins.nvim-treesitter.withPlugins (
-          plugins: builtins.attrValues { inherit (plugins) astro css; }
+        (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (
+          plugins: builtins.attrValues {inherit (plugins) astro css;}
         ))
       ];
     };

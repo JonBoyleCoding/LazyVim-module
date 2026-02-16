@@ -18,7 +18,7 @@ in
 
   config = mkIf cfg.extras.linting.eslint.enable {
     programs.neovim = {
-      extraPackages = [ pkgs.vscode-langservers-extracted ];
+      extraPackages = [cfg.pkgs.vscode-langservers-extracted];
     };
   };
 }

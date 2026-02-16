@@ -23,29 +23,29 @@ in
     programs.lazyvim = {
       masonPackages = optionalAttrs cfg.extras.dap.core.enable {
         ${
-          if pkgs.stdenv.hostPlatform.isWindows then
+          if cfg.pkgs.stdenv.hostPlatform.isWindows then
             "debugpy/venv/Scripts/pythonw.exe"
           else
             "debugpy/venv/bin/python"
         } =
-          (pkgs.python3.withPackages (ps: [ ps.debugpy ])).interpreter;
+          (cfg.pkgs.python3.withPackages (ps: [ ps.debugpy ])).interpreter;
       };
     };
 
     programs.neovim = {
-      extraPackages = attrValues { inherit (pkgs) pyright ruff; };
+      extraPackages = attrValues { inherit (cfg.pkgs) pyright ruff; };
 
       plugins =
         [
-          (pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: attrValues { inherit (plugins) ninja rst; }))
+          (cfg.pkgs.vimPlugins.nvim-treesitter.withPlugins (plugins: attrValues { inherit (plugins) ninja rst; }))
         ]
-        ++ optional cfg.extras.dap.core.enable pkgs.vimPlugins.nvim-dap-python
-        ++ optional cfg.extras.test.core.enable pkgs.vimPlugins.neotest-python;
+        ++ optional cfg.extras.dap.core.enable cfg.pkgs.vimPlugins.nvim-dap-python
+        ++ optional cfg.extras.test.core.enable cfg.pkgs.vimPlugins.neotest-python;
       # TODO: ++ optional cfg.extras.editor.telescope.enable (
-      #   pkgs.vimUtils.buildVimPlugin {
+      #   cfg.pkgs.vimUtils.buildVimPlugin {
       #     pname = "venv-selector.nvim";
       #     version = "2024-09-15";
-      #     src = pkgs.fetchFromGitHub {
+      #     src = cfg.pkgs.fetchFromGitHub {
       #       owner = "linux-cultist";
       #       repo = "venv-selector.nvim";
       #       rev = "e82594274bf7b54387f9a2abe65f74909ac66e97";
