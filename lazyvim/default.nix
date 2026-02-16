@@ -63,6 +63,7 @@ in
     ./extras/lang/json.nix
     ./extras/lang/markdown.nix
     ./extras/lang/nix.nix
+    ./extras/lang/ocaml.nix
     ./extras/lang/prisma.nix
     ./extras/lang/python.nix
     ./extras/lang/svelte.nix
